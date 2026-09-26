@@ -1,0 +1,283 @@
+3
+80
+0 "UBS Santo Estevão" "0"
+1 "UBS Jardim Copa" "0"
+2 "Hospital Santa Marcelina" "0"
+3 "UBS Cidade Líder" "0"
+4 "Ônibus Harry Dannenberg" "5"
+5 "Ônibus Cachoeira da Ilha" "5"
+6 "Ônibus Rio do Veríssimo" "5"
+7 "Ônibus Baltazar Nunes" "5"
+8 "UBS José Bonifácio II" "0"
+9 "UBS Vila Carmosina" "0"
+10 "UBS José Bonifácio III" "0"
+11 "UBS Jardim São Pedro" "0"
+12 "UBS José Bonifácio I" "0"
+13 "UBS Vila Nossa Senhora Aparecida" "0"
+14 "Hospital Itaquera" "200"
+15 "Centro Médico Martins Itaquera" "0"
+16 "Doutor SP" "0"
+17 "UBS Itaquera" "0"
+18 "Hospital Municipal Itaquera" "0"
+19 "Lavoisier Lab" "35"
+20 "Ônibus Américo Salvador Novelli" "0"
+21 "Dr Exame" "0"
+22 "Labi Exames" "0"
+23 "Hapvida Notrelabs" "0"
+24 "Kilomania" "35"
+25 "Bar e Restaurante Do Mineiro" "40"
+26 "Hair Point Barbearia" "40"
+27 "Espaço Inovart" "40"
+28 "La Ville Lavanderia" "32"
+29 "39Fit" "100"
+30 "Praia Fit Academia" "30"
+31 "Lavpop" "35"
+32 "Escola Estadual Professora Emília de Paiva Meira" "0"
+33 "Escola Estadual Alvares de Azevedo" "0"
+34 "Escola Professora Maria da Conceição Oliveira Costa" "0"
+35 "Escola Estadual Professor Quintiliano José Sitrangulo" "0"
+36 "CEDESP - Centro de Desenvolvimento Social e Produtivo para Adolescentes, Jovens e Adultos" "0"
+37 "Centro para Crianças e Adolescentes" "0"
+38 "Centro de Referência de Assistência Social" "0"
+39 "Escola Estadual Professora Apparecida Rahal" "0"
+40 "Escola Estadual Fadlo Haidar" "0"
+41 "Escola Estadual Professora Maria Ferraz de Campos" "0"
+42 "Escola Estadual Professora Kimako Kamada Kinoshita" "0"
+43 "Escola Estadual Professor Thales Castanho de Andrade" "0"
+44 "Centro de Convivência Intergeracional" "0"
+45 "Escola Estadual Professora Ruth Cabral Troncarelli" "0"
+46 "Escola Estadual Professor Geraldo Domingos Cortez" "0"
+47 "Centro para Crianças e Adolescentes II" "0"
+48 "Ensino Médio e Fundamental Haroldo Veloso" "0"
+49 "Serviço de Proteção Social às Crianças e Adolescentes Vítimas de Violência" "0"
+50 "Correios Cohab Itaquera" "0"
+51 "ETEC de Itaquera" "0"
+52 "Neo Química Arena" "60"
+53 "SESC" "6"
+54 "Clínica Veterinária Popular" "50"
+55 "Bom Prato Itaquera" "1"
+56 "Feira Livre" "0"
+57 "Lava Rápido e Estacionamento Agrutta Itaquera" "15"
+58 "Parque do Carmo" "0"
+59 "Parque de Diversões Marisa" "60"
+60 "Cinemark" "38"
+61 "Playland" "30"
+62 "Itaquera Beach Bar" "0"
+63 "Império Espeto Bar" "60"
+64 "Parque Linear do Córrego do Rio Verde" "0"
+65 "Smartfit" "0"
+66 "Clube Desportivo Municipal de Cidade Líder" "0"
+67 "Escola Estadual Dr Francisco Glycerio de Freitas" "0"
+68 "E.E. Prof. Luzia de Queiroz e Oliveira" "0"
+69 "Centro Esportivo José Bonifácio" "0"
+70 "Centro Dia para Idoso" "0"
+71 "Escola Estadual Professor Anísio Teixeira" "0"
+72 "Núcleo de Convivência de Idoso - NCI" "0"
+73 "EMEF Sebastião Francisco" "0"
+74 "Polícia Militar 28º BPM/M" "0"
+75 "Polícia Civil 53º DP - Pq. do Carmo" "0"
+76 "Ecoponto Vila Carmosina" "0"
+77 "Ecoponto Corinthians" "0"
+78 "Polícia Civil 103º DP - Itaquera/Cohab II" "0"
+79 "Sodiê Unidade Itaquera" "0"
+200
+0 1 420
+3 0 775
+2 3 427
+2 0 720
+3 4 164
+2 4 272
+0 5 50
+1 6 122
+7 4 1670
+7 5 1500
+7 6 1610
+8 11 1270
+7 8 291
+7 9 360
+9 8 608
+7 10 1540
+7 11 1860
+10 11 1270
+12 11 600
+12 10 870
+13 12 720
+14 13 721
+14 10 1260
+14 18 876
+15 3 330
+15 2 257
+15 0 515
+16 14 282
+17 16 286
+17 10 1650
+17 9 1350
+17 2 1640
+17 4 1790
+13 18 460
+19 17 90
+19 16 196
+20 17 60
+20 16 233
+21 14 213
+21 16 461
+21 13 705
+22 16 67
+22 19 242
+22 20 282
+22 17 330
+23 2 780
+23 3 1020
+23 17 920
+24 17 140
+24 23 779
+25 13 277
+25 21 478
+26 23 657
+26 9 656
+27 18 1240
+27 20 1890
+28 6 1520
+28 20 3520
+29 17 1160
+29 6 3360
+29 18 306
+29 13 550
+30 29 851
+30 19 396
+31 30 277
+31 17 499
+31 19 427
+31 18 942
+32 17 202
+32 23 248
+32 2 1520
+32 10 1530
+32 13 1360
+32 9 1150
+33 32 270
+33 17 306
+33 18 1200
+33 9 1230
+34 2 404
+34 32 1180
+34 0 962
+34 3 1180
+35 0 282
+35 3 500
+35 2 482
+36 2 113
+36 0 750
+36 35 544
+36 34 295
+37 36 22
+37 2 130
+37 35 540
+37 0 747
+38 34 388
+39 34 259
+39 38 188
+39 0 1160
+40 8 100
+40 9 678
+40 6 1740
+41 0 824
+41 1 882
+41 39 631
+41 8 904
+42 0 517
+42 1 438
+42 35 735
+43 38 169
+43 32 676
+43 39 340
+44 32 427
+44 43 326
+44 9 730
+45 10 273
+45 13 488
+45 32 1410
+46 45 385
+46 13 488
+46 32 1030
+47 45 212
+47 10 208
+47 13 212
+48 13 294
+48 18 942
+48 33 1120
+49 41 391
+49 8 397
+49 9 402
+50 10 547
+50 49 1040
+51 50 293
+51 10 293
+51 49 749
+52 4 1410
+53 6 2280
+54 17 109
+54 32 137
+54 33 335
+55 33 174
+55 23 253
+55 19 398
+56 44 221
+56 32 361
+56 33 403
+57 39 859
+57 43 632
+57 17 535
+57 23 403
+58 53 215
+58 6 2060
+59 17 458
+59 21 528
+59 16 199
+60 52 681
+60 4 1690
+61 52 681
+61 60 10
+62 2 293
+62 39 386
+62 23 718
+63 53 2140
+63 58 2210
+64 57 404
+64 23 365
+65 0 1260
+65 4 892
+66 65 378
+66 4 1130
+67 66 222
+67 4 1280
+68 67 547
+68 4 750
+68 66 548
+69 8 1090
+69 40 1010
+70 49 219
+70 8 533
+70 40 505
+71 70 222
+71 49 364
+72 65 421
+72 0 1490
+72 66 578
+73 72 509
+73 0 997
+74 73 783
+74 42 1000
+75 74 359
+75 42 644
+76 42 437
+76 75 450
+76 0 645
+77 69 86
+77 40 929
+78 40 708
+79 62 133
+79 2 397
+79 41 465
+17 18 950
+12 8 500
