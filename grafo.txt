@@ -62,10 +62,10 @@
 59 "Parque de Diversões Marisa" "60"
 60 "Cinemark" "38"
 61 "Playland" "30"
-62 "Itaquera Beach Bar" "0"
+62 "Itaquera Beach Bar" "30"
 63 "Império Espeto Bar" "60"
 64 "Parque Linear do Córrego do Rio Verde" "0"
-65 "Smartfit" "0"
+65 "Smartfit" "40"
 66 "Clube Desportivo Municipal de Cidade Líder" "0"
 67 "Escola Estadual Dr Francisco Glycerio de Freitas" "0"
 68 "E.E. Prof. Luzia de Queiroz e Oliveira" "0"
@@ -79,7 +79,7 @@
 76 "Ecoponto Vila Carmosina" "0"
 77 "Ecoponto Corinthians" "0"
 78 "Polícia Civil 103º DP - Itaquera/Cohab II" "0"
-79 "Sodiê Unidade Itaquera" "0"
+79 "Sodiê Unidade Itaquera" "20"
 200
 0 1 420
 3 0 775
