@@ -179,16 +179,12 @@ public class Main {
     }
 
     private static void opcaoConexidade(TGrafo grafo) {
-        if (grafo.getN() == 0) {
-            System.out.println("\nGrafo vazio - leia ou monte um grafo primeiro (opcao 'a' ou 'c').");
-            return;
-        }
+    if (grafo.getN() == 0) {
+        System.out.println("\nGrafo vazio - leia ou monte um grafo primeiro (opcao 'a' ou 'c').");
+        return;
+    }
 
-        System.out.println("\n-- Conexidade do grafo --");
-        if (grafo.ehConexo()) {
-            System.out.println("O grafo E CONEXO: existe pelo menos um caminho entre qualquer par de vertices.");
-        } else {
-            System.out.println("O grafo NAO E CONEXO: existem componentes ou vertices isolados que nao se alcancam.");
-        }
+    System.out.println("\n-- Conexidade do grafo --");
+    grafo.mostrarConexidade();
     }
 }
