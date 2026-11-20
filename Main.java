@@ -1,6 +1,6 @@
 /*
  * ======================================================================
- *
+ *  
  *
  *  Integrantes:
  *    Gabriel Teixeira Bolonha (10426937)
@@ -8,7 +8,6 @@
  *    Rodrigo Daiske Uehara    (10440295)
  *    Yating Zheng             (10439511)
  *
- * 
  */
 
 import java.io.PrintStream;
@@ -60,11 +59,40 @@ public class Main {
         }
     }
 
+    // Le um vertice pelo rotulo OU por parte do nome (ex.: "santo estevao")
+    private static Integer lerVertice(TGrafo g, String pergunta) {
+        while (true) {
+            String s = lerLinha(pergunta);
+            if (s == null) return null;
+            if (s.isEmpty()) continue;
+            try {
+                int r = Integer.parseInt(s);
+                if (g.existeRotulo(r)) return r;
+                System.out.println("Nao existe vertice com rotulo " + r + ".");
+                continue;
+            } catch (NumberFormatException e) {
+                // nao e numero: procura pelo nome
+            }
+            int achados[] = g.rotulosPorNome(s);
+            if (achados.length == 0) {
+                System.out.println("Nenhum local encontrado com \"" + s + "\".");
+            } else if (achados.length == 1) {
+                System.out.println("Selecionado: " + achados[0] + " " + g.apelidoDoRotulo(achados[0]));
+                return achados[0];
+            } else {
+                System.out.println("Varios locais encontrados, digite o rotulo ou um trecho mais especifico:");
+                for (int k = 0; k < Math.min(achados.length, 15); k++)
+                    System.out.println("   " + achados[k] + " " + g.apelidoDoRotulo(achados[k]));
+                if (achados.length > 15) System.out.println("   ... e mais " + (achados.length - 15));
+            }
+        }
+    }
+
     private static void mostrarMenu(TGrafo g) {
         System.out.println();
         System.out.println("==============================================================");
-        System.out.println(" SIMULADOR DE ORCAMENTO FAMILIAR COM RENDA MINIMA ");
-        System.out.println("\n");
+        System.out.println(" SIMULADOR DE ORCAMENTO FAMILIAR COM RENDA MINIMA (ODS 1)");
+        System.out.println(" Grafo de servicos essenciais de Itaquera (SP)");
         System.out.println(" Em memoria: tipo " + g.getTipoGrafo() + " | " + g.getN() +
                 " vertices | " + g.getM() + " arestas");
         System.out.println("==============================================================");
@@ -78,10 +106,13 @@ public class Main {
         System.out.println(" h) Mostrar grafo");
         System.out.println(" i) Apresentar a conexidade do grafo e o reduzido");
         System.out.println(" j) Encerrar a aplicacao");
+        System.out.println(" --- Parte 3 ---");
+        System.out.println(" k) Investigar solucao: menor rota dentro do orcamento (Dijkstra)");
+        System.out.println(" l) Caracteristicas do grafo (grau, euleriano, hamiltoniano, coloracao)");
     }
 
     public static void main(String[] args) {
-        
+        // Forca UTF-8 para acentos dos nomes (Estevao, Jose Bonifacio etc.)
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
         teclado = new Scanner(System.in, StandardCharsets.UTF_8);
 
@@ -156,12 +187,29 @@ public class Main {
                     case 'i':
                         g.mostrarConexidade();
                         break;
+                    case 'k': {
+                        if (g.getN() == 0) {
+                            System.out.println("Grafo vazio: leia o arquivo (opcao a) antes.");
+                            break;
+                        }
+                        Integer o = lerVertice(g, "Origem (rotulo ou parte do nome): ");
+                        if (o == null) break;
+                        Integer d = lerVertice(g, "Destino (rotulo ou parte do nome): ");
+                        if (d == null) break;
+                        Float orc = lerFloat("Orcamento maximo (R$): ");
+                        if (orc == null) break;
+                        g.mostrarRotaComOrcamento(o, d, orc);
+                        break;
+                    }
+                    case 'l':
+                        g.mostrarCaracteristicas();
+                        break;
                     case 'j':
                         System.out.println("Aplicacao encerrada.");
                         rodando = false;
                         break;
                     default:
-                        System.out.println("Opcao invalida. Use as letras de a ate j.");
+                        System.out.println("Opcao invalida. Use as letras de a ate l.");
                 }
             } catch (java.io.IOException e) {
                 // Arquivo ausente, incompleto ou invalido: avisa e volta ao menu.

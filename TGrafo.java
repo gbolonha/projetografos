@@ -1,14 +1,20 @@
 /*
  * ======================================================================
- *  
+ *  TGrafo.java
+ * 
  *
  *  Integrantes:
  *    Gabriel Teixeira Bolonha (10426937)
  *    Geovana Bomfim Rodrigues (10410514)
  *    Rodrigo Daiske Uehara    (10440295)
  *    Yating Zheng             (10439511)
- *  javac *.java
- *  java Main
+ *
+ *
+ *  
+ *    javac *.java
+ *    java Main
+ *
+ 
  */
 
 import java.io.BufferedReader;
@@ -667,6 +673,497 @@ public class TGrafo {
         } else {
             System.out.println("Categoria de conexidade: C" + categoriaConexidade());
             mostrarGrafoReduzido();
+        }
+    }
+
+    // ==================================================================
+    //  PARTE 3 - ITEM 1: rota de menor distancia dentro de um orcamento
+    //  Tecnica da disciplina: algoritmo de Dijkstra.
+    //
+    //  Modelo: peso da aresta = distancia (m); peso do vertice = custo (R$).
+    //  Custo da rota = soma dos pesos dos vertices visitados, exceto a
+    //  origem (quem sai de casa nao paga por estar la). Distancia e custo
+    //  tem unidades diferentes e NAO sao somados: a distancia e o que se
+    //  minimiza e o custo e uma restricao (custo total <= orcamento).
+    //
+    //  Como o custo depende do caminho todo, um unico rotulo de distancia
+    //  por vertice nao basta. Cada vertice guarda varias etiquetas
+    //  (distancia, custo) e uma etiqueta so e descartada quando outra ja
+    //  fechada naquele vertice e melhor ou igual nas DUAS medidas.
+    //  A fila de prioridade ordena por distancia, como no Dijkstra.
+    // ==================================================================
+
+    // Etiqueta de um caminho parcial: chegou em v com distancia e custo acumulados
+    private static class Etiqueta {
+        int v;
+        float dist;
+        float custo;
+        Etiqueta pai;
+        Etiqueta(int v, float dist, float custo, Etiqueta pai) {
+            this.v = v; this.dist = dist; this.custo = custo; this.pai = pai;
+        }
+    }
+
+    private float custoDoVertice(int i) {
+        return temPesoVertice() ? pesoVertice[i] : 0f;
+    }
+
+    private static boolean dominada(List<Etiqueta> fechadas, float dist, float custo) {
+        for (Etiqueta f : fechadas)
+            if (f.dist <= dist && f.custo <= custo) return true;
+        return false;
+    }
+
+    // Menor distancia de o ate d com custo total <= orcamento (null se impossivel)
+    private Etiqueta menorRota(int o, int d, float orcamento) {
+        List<List<Etiqueta>> fechadas = new ArrayList<>();
+        for (int i = 0; i < n; i++) fechadas.add(new ArrayList<>());
+        java.util.PriorityQueue<Etiqueta> fila = new java.util.PriorityQueue<>(
+                (a, b) -> a.dist != b.dist ? Float.compare(a.dist, b.dist) : Float.compare(a.custo, b.custo));
+        fila.add(new Etiqueta(o, 0f, 0f, null));
+
+        while (!fila.isEmpty()) {
+            Etiqueta e = fila.poll();
+            if (dominada(fechadas.get(e.v), e.dist, e.custo)) continue;
+            fechadas.get(e.v).add(e);
+            if (e.v == d) return e; // primeira etiqueta fechada no destino = menor distancia viavel
+            for (int u = 0; u < n; u++) {
+                if (!existe(e.v, u)) continue;
+                float nd = e.dist + adj[e.v][u];
+                float nc = e.custo + custoDoVertice(u);
+                if (nc > orcamento) continue;
+                if (dominada(fechadas.get(u), nd, nc)) continue;
+                fila.add(new Etiqueta(u, nd, nc, e));
+            }
+        }
+        return null;
+    }
+
+    public boolean existeRotulo(int rot) { return posicaoPorRotulo(rot) != -1; }
+
+    public String apelidoDoRotulo(int rot) {
+        int p = posicaoPorRotulo(rot);
+        return p == -1 ? null : apelido[p];
+    }
+
+    private static String semAcento(String s) {
+        return java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").toLowerCase();
+    }
+
+    // Rotulos dos vertices cujo apelido contem o trecho (sem diferenciar acento/maiuscula)
+    public int[] rotulosPorNome(String trecho) {
+        String t = semAcento(trecho.trim());
+        List<Integer> achados = new ArrayList<>();
+        for (int i = 0; i < n; i++)
+            if (semAcento(apelido[i]).contains(t)) achados.add(rotulo[i]);
+        int r[] = new int[achados.size()];
+        for (int i = 0; i < r.length; i++) r[i] = achados.get(i);
+        return r;
+    }
+
+    // Corta nomes longos para a tabela nao desalinhar
+    private static String curto(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max - 1) + "~";
+    }
+
+    private void imprimeRota(Etiqueta fim, float orcamento) {
+        List<Etiqueta> passos = new ArrayList<>();
+        for (Etiqueta e = fim; e != null; e = e.pai) passos.add(0, e);
+        System.out.printf("  %-4s %-6s %-42s %10s %12s %10s %10s%n",
+                "Pas.", "Rot.", "Local", "Trecho(m)", "Acum.(m)", "Custo R$", "Acum. R$");
+        for (int k = 0; k < passos.size(); k++) {
+            Etiqueta e = passos.get(k);
+            float trecho = k == 0 ? 0f : e.dist - passos.get(k - 1).dist;
+            float cv = k == 0 ? 0f : e.custo - passos.get(k - 1).custo;
+            System.out.printf("  %-4d %-6d %-42s %10s %12s %10s %10s%n",
+                    k, rotulo[e.v], curto(apelido[e.v], 42), fmt(trecho), fmt(e.dist), fmt(cv), fmt(e.custo));
+        }
+        System.out.println("  Total: " + fmt(fim.dist) + " m (" + String.format(java.util.Locale.US, "%.2f", fim.dist / 1000f)
+                + " km), custo R$ " + fmt(fim.custo)
+                + (orcamento >= fim.custo ? ", sobra do orcamento R$ " + fmt(orcamento - fim.custo)
+                                          : ", faltam R$ " + fmt(fim.custo - orcamento) + " no orcamento"));
+    }
+
+    // OPCAO K: rota de menor distancia respeitando o orcamento (uma unica versao de Dijkstra)
+    public void mostrarRotaComOrcamento(int rotOrigem, int rotDestino, float orcamento) {
+        int o = posicaoPorRotulo(rotOrigem), d = posicaoPorRotulo(rotDestino);
+        if (o == -1 || d == -1) {
+            System.out.println("Erro: rotulo de vertice inexistente.");
+            return;
+        }
+        if (!pesoValido(orcamento)) {
+            System.out.println("Erro: orcamento invalido.");
+            return;
+        }
+        System.out.println("\nOrigem : " + rotOrigem + " " + apelido[o]);
+        System.out.println("Destino: " + rotDestino + " " + apelido[d]);
+        System.out.println("Orcamento: R$ " + fmt(orcamento) + " (custo = soma dos pesos dos vertices visitados, sem contar a origem)");
+        System.out.println("\nMenor distancia com custo <= R$ " + fmt(orcamento) + " (Dijkstra com restricao de orcamento):");
+
+        Etiqueta rota = menorRota(o, d, orcamento);
+        if (rota == null)
+            System.out.println("  Nao existe rota entre os dois locais dentro desse orcamento.");
+        else
+            imprimeRota(rota, orcamento);
+    }
+
+    // ==================================================================
+    //  PARTE 3 - ITEM 2: caracteristicas do problema modelado
+    //  (1) grau dos vertices  (2) euleriano  (3) hamiltoniano  (4) coloracao
+    // ==================================================================
+
+    private String listaRotulos(List<Integer> posicoes) {
+        StringBuilder sb = new StringBuilder();
+        for (int k = 0; k < posicoes.size(); k++) {
+            if (k > 0) sb.append(", ");
+            sb.append(rotulo[posicoes.get(k)]);
+        }
+        return sb.toString();
+    }
+
+    // OPCAO L
+    public void mostrarCaracteristicas() {
+        if (n == 0) {
+            System.out.println("Grafo vazio: leia o arquivo (opcao a) antes.");
+            return;
+        }
+        System.out.println("\n============ CARACTERISTICAS DO GRAFO ============");
+        System.out.println("Tipo " + tipoGrafo + " (" + descricaoTipo(tipoGrafo) + ") | n = " + n + " | m = " + m);
+        caracGraus();
+        caracEuler();
+        caracHamilton();
+        caracColoracao();
+        System.out.println("==================================================\n");
+    }
+
+    // ---------- (1) grau dos vertices ----------
+    private void caracGraus() {
+        System.out.println("\n--- 1. Grau dos vertices ---");
+        int grauS[] = new int[n], grauE[] = new int[n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (existe(i, j)) { grauS[i]++; grauE[j]++; }
+        if (!isOrientado()) {
+            resumoGrau("Grau", grauS);
+            int soma = 0;
+            for (int g : grauS) soma += g;
+            System.out.println("Soma dos graus = " + soma + " = 2 x m (" + (2 * m) + "): " + (soma == 2 * m ? "confere (lema do aperto de maos)." : "NAO confere!"));
+        } else {
+            resumoGrau("Grau de saida", grauS);
+            resumoGrau("Grau de entrada", grauE);
+        }
+    }
+
+    private void resumoGrau(String nomeGrau, int g[]) {
+        int min = Integer.MAX_VALUE, max = 0, soma = 0;
+        for (int x : g) { min = Math.min(min, x); max = Math.max(max, x); soma += x; }
+        System.out.println(nomeGrau + ": minimo " + min + ", maximo " + max + ", medio " +
+                String.format(java.util.Locale.US, "%.2f", soma / (double) n));
+        java.util.TreeMap<Integer, Integer> dist = new java.util.TreeMap<>();
+        for (int x : g) dist.merge(x, 1, Integer::sum);
+        StringBuilder sb = new StringBuilder("Distribuicao (grau:quantidade): ");
+        for (java.util.Map.Entry<Integer, Integer> e : dist.entrySet())
+            sb.append(e.getKey()).append(":").append(e.getValue()).append("  ");
+        System.out.println(sb);
+
+        Integer idx[] = new Integer[n];
+        for (int i = 0; i < n; i++) idx[i] = i;
+        java.util.Arrays.sort(idx, (a, b) -> g[b] - g[a]);
+        System.out.println("Mais conectados:");
+        for (int k = 0; k < Math.min(5, n); k++)
+            System.out.println("   " + rotulo[idx[k]] + " " + apelido[idx[k]] + " (" + g[idx[k]] + ")");
+        List<Integer> baixos = new ArrayList<>();
+        for (int i = 0; i < n; i++) if (g[i] <= 1) baixos.add(i);
+        if (!baixos.isEmpty()) {
+            System.out.println("Vertices com grau 0 ou 1 (pendentes):");
+            for (int i : baixos) System.out.println("   " + rotulo[i] + " " + apelido[i] + " (" + g[i] + ")");
+        }
+    }
+
+    // ---------- (2) euleriano ----------
+    private void caracEuler() {
+        System.out.println("\n--- 2. Grafo euleriano / percurso euleriano ---");
+        boolean conexo = ehConexo();
+        if (!isOrientado()) {
+            List<Integer> impares = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                int g = 0;
+                for (int j = 0; j < n; j++) if (existe(i, j)) g++;
+                if (g % 2 == 1) impares.add(i);
+            }
+            System.out.println("Conexo: " + (conexo ? "sim" : "nao") + " | vertices de grau impar: " + impares.size());
+            if (!impares.isEmpty() && impares.size() <= 30)
+                System.out.println("Impares: " + listaRotulos(impares));
+            if (conexo && impares.isEmpty())
+                System.out.println("Resultado: grafo EULERIANO (existe ciclo euleriano).");
+            else if (conexo && impares.size() == 2)
+                System.out.println("Resultado: NAO e euleriano, mas TEM percurso euleriano aberto, de " +
+                        rotulo[impares.get(0)] + " ate " + rotulo[impares.get(1)] + ".");
+            else {
+                System.out.println("Resultado: NAO e euleriano e NAO tem percurso euleriano" +
+                        (conexo ? " (exige 0 ou 2 vertices de grau impar)." : " (o grafo nao e conexo)."));
+                if (conexo)
+                    System.out.println("Para virar euleriano seria preciso repetir ou acrescentar ao menos " +
+                            (impares.size() / 2) + " arestas, uma para cada par de vertices impares.");
+            }
+        } else {
+            int saiMais = 0, entraMais = 0, outros = 0;
+            for (int i = 0; i < n; i++) {
+                int s = 0, e = 0;
+                for (int j = 0; j < n; j++) { if (existe(i, j)) s++; if (existe(j, i)) e++; }
+                if (s - e == 1) saiMais++;
+                else if (e - s == 1) entraMais++;
+                else if (s != e) outros++;
+            }
+            if (conexo && outros == 0 && saiMais == 0 && entraMais == 0)
+                System.out.println("Resultado: grafo EULERIANO (grau de entrada = saida em todos os vertices).");
+            else if (conexo && outros == 0 && saiMais == 1 && entraMais == 1)
+                System.out.println("Resultado: NAO e euleriano, mas TEM percurso euleriano.");
+            else
+                System.out.println("Resultado: NAO e euleriano e NAO tem percurso euleriano.");
+        }
+    }
+
+    // ---------- (3) hamiltoniano ----------
+    private int tempoDfs;
+
+    // DFS de Tarjan: acha pontos de articulacao e blocos (componentes biconexas)
+    private void dfsBlocos(int u, int pai, int disc[], int low[], boolean art[],
+                           java.util.ArrayDeque<int[]> pilha, List<java.util.Set<Integer>> blocos) {
+        disc[u] = low[u] = ++tempoDfs;
+        int filhos = 0;
+        for (int w = 0; w < n; w++) {
+            if (w == u || !existe(u, w)) continue;
+            if (disc[w] == 0) {
+                filhos++;
+                pilha.push(new int[]{u, w});
+                dfsBlocos(w, u, disc, low, art, pilha, blocos);
+                low[u] = Math.min(low[u], low[w]);
+                if ((pai == -1 && filhos > 1) || (pai != -1 && low[w] >= disc[u])) art[u] = true;
+                if (low[w] >= disc[u]) {
+                    java.util.Set<Integer> bloco = new java.util.HashSet<>();
+                    int ar[];
+                    do {
+                        ar = pilha.pop();
+                        bloco.add(ar[0]);
+                        bloco.add(ar[1]);
+                    } while (!(ar[0] == u && ar[1] == w));
+                    blocos.add(bloco);
+                }
+            } else if (w != pai && disc[w] < disc[u]) {
+                pilha.push(new int[]{u, w});
+                low[u] = Math.min(low[u], disc[w]);
+            }
+        }
+    }
+
+    // Busca exaustiva (com limite de nos) por caminho/ciclo hamiltoniano
+    private long nosBusca, limiteBusca;
+    private boolean usadoHam[];
+    private int caminhoHam[];
+    private boolean buscaCiclo;
+
+    private boolean hamDfs(int u, int prof) {
+        if (prof == n) return !buscaCiclo || existe(u, caminhoHam[0]);
+        if (++nosBusca > limiteBusca) return false;
+        for (int w = 0; w < n; w++) {
+            if (!usadoHam[w] && existe(u, w)) {
+                usadoHam[w] = true;
+                caminhoHam[prof] = w;
+                if (hamDfs(w, prof + 1)) return true;
+                usadoHam[w] = false;
+                if (nosBusca > limiteBusca) return false;
+            }
+        }
+        return false;
+    }
+
+    // 1 = encontrou, 0 = nao existe (busca completa), -1 = inconclusivo (estourou o limite)
+    private int buscaHamilton(boolean ciclo) {
+        buscaCiclo = ciclo;
+        nosBusca = 0;
+        limiteBusca = 3_000_000L;
+        caminhoHam = new int[n];
+        for (int s = 0; s < (ciclo ? 1 : n); s++) {
+            usadoHam = new boolean[n];
+            usadoHam[s] = true;
+            caminhoHam[0] = s;
+            if (hamDfs(s, 1)) return 1;
+            if (nosBusca > limiteBusca) return -1;
+        }
+        return 0;
+    }
+
+    private void caracHamilton() {
+        System.out.println("\n--- 3. Hamiltoniano (ciclo e caminho) ---");
+        boolean refutaCiclo = false, refutaCaminho = false;
+
+        if (n < 3) refutaCiclo = true;
+        if (!ehConexo()) {
+            System.out.println("O grafo nao e conexo: nao tem ciclo nem caminho hamiltoniano.");
+            return;
+        }
+
+        if (!isOrientado()) {
+            int grauMin = Integer.MAX_VALUE;
+            List<Integer> pendentes = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                int g = 0;
+                for (int j = 0; j < n; j++) if (existe(i, j)) g++;
+                grauMin = Math.min(grauMin, g);
+                if (g < 2) pendentes.add(i);
+            }
+            int disc[] = new int[n], low[] = new int[n];
+            boolean art[] = new boolean[n];
+            List<java.util.Set<Integer>> blocos = new ArrayList<>();
+            tempoDfs = 0;
+            dfsBlocos(0, -1, disc, low, art, new java.util.ArrayDeque<>(), blocos);
+            List<Integer> arts = new ArrayList<>();
+            for (int i = 0; i < n; i++) if (art[i]) arts.add(i);
+            int folhas = 0;
+            for (java.util.Set<Integer> b : blocos) {
+                int c = 0;
+                for (int v : b) if (art[v]) c++;
+                if (c == 1) folhas++;
+            }
+            System.out.println("Grau minimo: " + grauMin + " | pontos de articulacao: " + arts.size() +
+                    (arts.isEmpty() ? "" : " (" + listaRotulos(arts) + ")") + " | blocos-folha: " + folhas);
+
+            if (!pendentes.isEmpty()) {
+                refutaCiclo = true;
+                System.out.println("Ciclo: impossivel, pois ha vertice de grau < 2 (" + listaRotulos(pendentes) + "), e todo vertice de um ciclo precisa de 2 vizinhos.");
+            }
+            if (!arts.isEmpty()) {
+                refutaCiclo = true;
+                System.out.println("Ciclo: impossivel, pois ha ponto de articulacao (um ciclo hamiltoniano nao pode ser desconectado por um unico vertice).");
+            }
+            if (folhas > 2) {
+                refutaCaminho = true;
+                System.out.println("Caminho: impossivel, pois ha " + folhas + " blocos-folha; cada um precisa conter uma extremidade do caminho e so existem 2.");
+            }
+            if (!refutaCiclo && grauMin * 2 >= n && n >= 3) {
+                System.out.println("Teorema de Dirac satisfeito (grau minimo >= n/2): o grafo TEM ciclo hamiltoniano.");
+                return;
+            }
+        }
+
+        if (!refutaCiclo) {
+            int r = buscaHamilton(true);
+            System.out.println(r == 1 ? "Resultado do ciclo: TEM ciclo hamiltoniano."
+                    : r == 0 ? "Resultado do ciclo: NAO tem ciclo hamiltoniano (busca completa)."
+                    : "Resultado do ciclo: INCONCLUSIVO (a busca passou do limite de " + limiteBusca + " passos).");
+            if (r == 1) { System.out.println("O grafo tambem tem caminho hamiltoniano."); return; }
+        } else {
+            System.out.println("Resultado do ciclo: NAO admite ciclo hamiltoniano.");
+        }
+
+        if (refutaCaminho) {
+            System.out.println("Resultado do caminho: NAO admite caminho hamiltoniano.");
+        } else {
+            int r = buscaHamilton(false);
+            System.out.println(r == 1 ? "Resultado do caminho: TEM caminho hamiltoniano."
+                    : r == 0 ? "Resultado do caminho: NAO tem caminho hamiltoniano (busca completa)."
+                    : "Resultado do caminho: INCONCLUSIVO (a busca passou do limite de " + limiteBusca + " passos).");
+        }
+    }
+
+    // ---------- (4) coloracao ----------
+    private boolean vizinhos(int i, int j) {
+        return i != j && (existe(i, j) || existe(j, i));
+    }
+
+    // Colore com DSATUR (guloso por grau de saturacao). Devolve cor[i] de 0 em diante.
+    private int[] coloreDsatur() {
+        int cor[] = new int[n];
+        java.util.Arrays.fill(cor, -1);
+        for (int passo = 0; passo < n; passo++) {
+            int melhor = -1, melhorSat = -1, melhorGrau = -1;
+            for (int i = 0; i < n; i++) {
+                if (cor[i] != -1) continue;
+                java.util.Set<Integer> cores = new java.util.HashSet<>();
+                int grau = 0;
+                for (int j = 0; j < n; j++) {
+                    if (!vizinhos(i, j)) continue;
+                    grau++;
+                    if (cor[j] != -1) cores.add(cor[j]);
+                }
+                if (cores.size() > melhorSat || (cores.size() == melhorSat && grau > melhorGrau)) {
+                    melhor = i; melhorSat = cores.size(); melhorGrau = grau;
+                }
+            }
+            boolean usada[] = new boolean[n + 1];
+            for (int j = 0; j < n; j++) if (vizinhos(melhor, j) && cor[j] != -1) usada[cor[j]] = true;
+            int c = 0;
+            while (usada[c]) c++;
+            cor[melhor] = c;
+        }
+        return cor;
+    }
+
+    // Clique maxima (Bron-Kerbosch com pivo); serve de limite inferior para o numero cromatico
+    private List<Integer> melhorClique;
+    private long nosClique;
+
+    private void bronKerbosch(List<Integer> r, List<Integer> p, List<Integer> x) {
+        if (++nosClique > 2_000_000L) return;
+        if (p.isEmpty() && x.isEmpty()) {
+            if (r.size() > melhorClique.size()) melhorClique = new ArrayList<>(r);
+            return;
+        }
+        if (r.size() + p.size() <= melhorClique.size()) return;
+        int pivo = -1, melhorCont = -1;
+        List<Integer> uniao = new ArrayList<>(p);
+        uniao.addAll(x);
+        for (int u : uniao) {
+            int cont = 0;
+            for (int v : p) if (vizinhos(u, v)) cont++;
+            if (cont > melhorCont) { melhorCont = cont; pivo = u; }
+        }
+        List<Integer> candidatos = new ArrayList<>();
+        for (int v : p) if (!vizinhos(pivo, v)) candidatos.add(v);
+        for (int v : candidatos) {
+            List<Integer> r2 = new ArrayList<>(r); r2.add(v);
+            List<Integer> p2 = new ArrayList<>(), x2 = new ArrayList<>();
+            for (int w : p) if (vizinhos(v, w)) p2.add(w);
+            for (int w : x) if (vizinhos(v, w)) x2.add(w);
+            bronKerbosch(r2, p2, x2);
+            p.remove(Integer.valueOf(v));
+            x.add(v);
+        }
+    }
+
+    private void caracColoracao() {
+        System.out.println("\n--- 4. Coloracao (particoes sem vertices vizinhos) ---");
+        int cor[] = coloreDsatur();
+        int ub = 0;
+        for (int c : cor) ub = Math.max(ub, c + 1);
+
+        boolean valida = true;
+        for (int i = 0; i < n; i++)
+            for (int j = i + 1; j < n; j++)
+                if (vizinhos(i, j) && cor[i] == cor[j]) valida = false;
+
+        melhorClique = new ArrayList<>();
+        nosClique = 0;
+        List<Integer> p = new ArrayList<>();
+        for (int i = 0; i < n; i++) p.add(i);
+        bronKerbosch(new ArrayList<>(), p, new ArrayList<>());
+        int lb = melhorClique.size();
+
+        System.out.println("Coloracao DSATUR usa " + ub + " cores (limite superior). Verificacao: " +
+                (valida ? "nenhum par de vizinhos com a mesma cor." : "ERRO, ha vizinhos com a mesma cor!"));
+        System.out.println("Maior clique encontrada: " + lb + " vertices (limite inferior): " +
+                listaRotulos(melhorClique));
+        if (lb == ub)
+            System.out.println("Numero cromatico = " + ub + " (limite inferior = limite superior).");
+        else
+            System.out.println("Numero cromatico entre " + lb + " e " + ub + ".");
+
+        for (int c = 0; c < ub; c++) {
+            List<Integer> classe = new ArrayList<>();
+            for (int i = 0; i < n; i++) if (cor[i] == c) classe.add(i);
+            System.out.println("Particao " + (c + 1) + " (" + classe.size() + " vertice(s)): " + listaRotulos(classe));
         }
     }
 
